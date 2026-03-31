@@ -117,12 +117,6 @@ try {
         }
     };
 
-    startBtn.onclick = async () => {
-        setupContainer.style.display = 'none';
-        canvas.style.display = 'block';
-        await dotnet.run();
-    };
-
 } catch (err) {
     out.innerHTML = "Error loading WASM: " + err;
     console.error(err);
