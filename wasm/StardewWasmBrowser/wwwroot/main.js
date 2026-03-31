@@ -86,11 +86,19 @@ try {
         }
     }
     
-    out.innerHTML = "Launch Sequence Ready!";
+    out.innerHTML = "Launch Sequence Ready! Booting Game...";
     progressBar.style.width = "100%";
     percentageText.innerText = "100%";
-    startBtn.disabled = false;
-    startBtn.innerText = "Play Stardew Valley";
+    
+    // Auto-boot sequence
+    setTimeout(async () => {
+        setupContainer.style.opacity = '0';
+        setupContainer.style.transition = 'opacity 1s';
+        setTimeout(() => { setupContainer.style.display = 'none'; }, 1000);
+        
+        canvas.style.display = 'block';
+        await dotnet.run();
+    }, 500);
 
     // Mount IDBFS for save files
     if (!Module.FS.analyzePath('/home/web_user').exists) Module.FS.mkdir('/home/web_user');
