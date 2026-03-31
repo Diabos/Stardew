@@ -1,0 +1,14 @@
+bin/
+obj/
+.vs/
+.log/
+.DS_Store
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Emscripten temp files
+em_cache/
+*.wasm
+*.bc

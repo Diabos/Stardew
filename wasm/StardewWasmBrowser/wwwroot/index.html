@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Stardew Valley WebAssembly</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+      body { margin: 0; padding: 0; background-color: #222; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+      canvas { display: none; image-rendering: pixelated; max-width: 100%; max-height: 100vh; box-shadow: 0 0 20px black; }
+      #setup-container { text-align: center; background: #333; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+      #drop-zone { border: 2px dashed #666; padding: 3rem; margin: 1.5rem 0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+      #drop-zone.dragover { border-color: #4CAF50; background: #2e4a2e; }
+      #out { margin-top: 1rem; font-family: monospace; color: #aaa; }
+      button { padding: 10px 20px; font-size: 1.1rem; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 4px; }
+      button:disabled { background: #555; cursor: not-allowed; }
+  </style>
+  <script type='module' src="./main.js"></script>
+</head>
+
+<body>
+  <div id="setup-container">
+      <h1>Stardew Valley WebAssembly</h1>
+      <p>Because of copyright, you must provide your own game assets.</p>
+      <div id="drop-zone">
+          <p>Drag & Drop your <b>Content</b> folder here</p>
+          <small>(Or click to select folder)</small>
+          <input type="file" id="folder-input" webkitdirectory directory multiple style="display: none;" />
+      </div>
+      <button id="start-btn" disabled>Waiting for assets...</button>
+      <div id="out">Checking storage...</div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+</body>
+
+</html>
+

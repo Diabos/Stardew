@@ -1,0 +1,58 @@
+name: Build and Deploy StardewWasm to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          
+      - name: Install wasm-tools workload
+        run: dotnet workload install wasm-tools
+
+      - name: Clone FNA-WASM-Build (for native libs)
+        run: |
+          git clone https://github.com/clarvalon/FNA-WASM-Build.git fna-build
+          # Because this is a proof of concept, actual FNA Emscripten builds
+          # must be supplied or compiled here. If you have valid SDL2.a, FAudio.a,
+          # FNA3D.a, and libmojoshader.a, copy them to lib/*/browser-wasm/
+          #
+          # NOTE: The provided .a files in the lib folder in the repo will be used
+          # automatically by the MSBuild script because GITHUB_ACTIONS is true.
+
+      - name: Publish WASM project
+        run: dotnet publish wasm/StardewWasmBrowser/StardewWasmBrowser.csproj -c Release -o output
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/wwwroot
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

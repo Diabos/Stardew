@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Stardew Valley</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <NoWarn>CS0162;CS0168;CS0219;CS0414;CS0649;CS0108;CS0114;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8619;CS8620;CS8625;CS8765;CS8767;CS0067;CS0169;CS0612;CS0618;CS0105;CS0436</NoWarn>
+    <Nullable>disable</Nullable>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\FNA\FNA.Core.csproj" />
+    <ProjectReference Include="..\xTile\xTile.csproj" />
+    <ProjectReference Include="..\StardewValley.GameData\StardewValley.GameData.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Compile-time only references for multiplayer/platform types -->
+    <Reference Include="Steamworks.NET">
+      <HintPath>..\..\refs\Steamworks.NET.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GalaxyCSharp">
+      <HintPath>..\..\refs\GalaxyCSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Lidgren.Network">
+      <HintPath>..\..\refs\Lidgren.Network.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SkiaSharp">
+      <HintPath>..\..\refs\SkiaSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BmFont">
+      <HintPath>..\..\refs\BmFont.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TextCopy">
+      <HintPath>..\..\refs\TextCopy.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Data.HashFunction.Interfaces">
+      <HintPath>..\..\refs\System.Data.HashFunction.Interfaces.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Data.HashFunction.xxHash">
+      <HintPath>..\..\refs\System.Data.HashFunction.xxHash.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Data.HashFunction.Core">
+      <HintPath>..\..\refs\System.Data.HashFunction.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
