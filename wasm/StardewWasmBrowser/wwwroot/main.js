@@ -18,72 +18,66 @@ try {
     
     moduleAPI = Module;
 
-    out.innerHTML = "WASM Loaded. Ready for assets.";
+    out.innerHTML = "WASM Engine Booted. Connecting to Cloud Assets...";
 
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    // Start automated asset download loop
+    const response = await fetch('assets/catalog.json');
+    const catalog = await response.json();
     
-    dropZone.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        out.innerHTML = "Processing files... Please wait.";
-        
-        try {
-            if (!Module.FS.analyzePath('/Content').exists) Module.FS.mkdir('/Content');
-            
-            let totalFiles = 0; let processedFiles = 0;
-            
-            function checkDone() {
-                if (processedFiles === totalFiles) {
-                    out.innerHTML = `Loaded ${totalFiles} assets! Ready to play.`;
-                    startBtn.disabled = false;
-                    startBtn.innerText = "Start Game";
-                }
-            }
-            
-            async function processEntry(entry, currentPath) {
-                if (entry.isFile) {
-                    totalFiles++;
-                    entry.file(async (file) => {
-                        const arr = new Uint8Array(await file.arrayBuffer());
-                        const dest = currentPath ? `/Content/${currentPath}/${file.name}` : `/Content/${file.name}`;
-                        Module.FS.writeFile(dest, arr);
-                        processedFiles++;
-                        if (processedFiles % 100 === 0) out.innerHTML = `Loaded ${processedFiles} files...`;
-                        checkDone();
-                    });
-                } else if (entry.isDirectory) {
-                    const newPath = currentPath ? `${currentPath}/${entry.name}` : entry.name;
-                    if (!Module.FS.analyzePath(`/Content/${newPath}`).exists) Module.FS.mkdir(`/Content/${newPath}`);
-                    const dirReader = entry.createReader();
-                    
-                    // readEntries doesn't return all files at once if there are >100, requires looping
-                    const readAll = () => {
-                        dirReader.readEntries((entries) => {
-                            if (entries.length > 0) {
-                                entries.forEach(e => processEntry(e, newPath));
-                                readAll();
-                            } else {
-                                checkDone(); // in case folder was empty
-                            }
-                        });
-                    };
-                    readAll();
-                }
-            }
-            
-            const items = e.dataTransfer.items;
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                if (item.kind === 'file') {
-                    const entry = item.webkitGetAsEntry();
-                    if (entry) processEntry(entry, "");
-                }
-            }
-        } catch (err) {
-            out.innerHTML = "Error processing files: " + err;
+    let chunks = [];
+    let numChunks = 14; 
+    
+    for(let i = 0; i < numChunks; i++) {
+        out.innerHTML = `Downloading cloud assets... (${Math.round((i/numChunks) * 100)}%)`;
+        let res = await fetch(`assets/chunk_${i}.bin`);
+        chunks[i] = await res.arrayBuffer();
+    }
+    
+    out.innerHTML = "Reconstructing File System...";
+    if (!Module.FS.analyzePath('/Content').exists) Module.FS.mkdir('/Content');
+    
+    let entries = Object.entries(catalog);
+    let totalFiles = entries.length;
+    let processedFiles = 0;
+    
+    for (const [path, info] of entries) {
+        const parts = path.split('/');
+        let currentDir = '/Content';
+        for(let j = 0; j < parts.length - 1; j++) {
+            currentDir += '/' + parts[j];
+            if (!Module.FS.analyzePath(currentDir).exists) Module.FS.mkdir(currentDir);
         }
-    });
+        
+        let bytesLeft = info.length;
+        let pChunk = info.chunk_start;
+        let pOffset = info.offset_start;
+        
+        let fileData = new Uint8Array(bytesLeft);
+        let dstOffset = 0;
+        
+        while(bytesLeft > 0) {
+            let chunkData = chunks[pChunk];
+            let bytesToCopy = Math.min(bytesLeft, chunkData.byteLength - pOffset);
+            let view = new Uint8Array(chunkData, pOffset, bytesToCopy);
+            fileData.set(view, dstOffset);
+            
+            dstOffset += bytesToCopy;
+            bytesLeft -= bytesToCopy;
+            pChunk++;
+            pOffset = 0;
+        }
+        
+        Module.FS.writeFile('/Content/' + path, fileData);
+        processedFiles++;
+        
+        if (processedFiles % 100 === 0) {
+            out.innerHTML = `Extracting to VFS... (${Math.round((processedFiles/totalFiles)*100)}%)`;
+        }
+    }
+    
+    out.innerHTML = "Asset Sync Complete!";
+    startBtn.disabled = false;
+    startBtn.innerText = "Play Stardew Valley";
 
     // Mount IDBFS for save files
     if (!Module.FS.analyzePath('/home/web_user').exists) Module.FS.mkdir('/home/web_user');
