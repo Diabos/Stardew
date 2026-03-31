@@ -28,16 +28,6 @@ jobs:
       - name: Install wasm-tools workload
         run: dotnet workload install wasm-tools
 
-      - name: Clone FNA-WASM-Build (for native libs)
-        run: |
-          git clone https://github.com/clarvalon/FNA-WASM-Build.git fna-build
-          # Because this is a proof of concept, actual FNA Emscripten builds
-          # must be supplied or compiled here. If you have valid SDL2.a, FAudio.a,
-          # FNA3D.a, and libmojoshader.a, copy them to lib/*/browser-wasm/
-          #
-          # NOTE: The provided .a files in the lib folder in the repo will be used
-          # automatically by the MSBuild script because GITHUB_ACTIONS is true.
-
       - name: Publish WASM project
         run: dotnet publish wasm/StardewWasmBrowser/StardewWasmBrowser.csproj -c Release -o output
 
