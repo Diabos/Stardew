@@ -10,10 +10,12 @@
         margin: 0; padding: 0; background-color: #222; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; 
         background-image: url('splash.png'); background-size: cover; background-position: center;
       }
-      canvas { display: none; image-rendering: pixelated; max-width: 100%; max-height: 100vh; box-shadow: 0 0 40px black; }
+      canvas { display: none; image-rendering: pixelated; max-width: 100vw; max-height: 100vh; width: 100vw; height: 100vh; object-fit: contain; box-shadow: 0 0 40px black; background: #000; }
       #setup-container { 
+        position: absolute;
+        top: 50%; left: 50%; transform: translate(-50%, -50%);
         text-align: center; background: rgba(51, 51, 51, 0.9); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.8); width: 450px;
-        backdrop-filter: blur(5px); transition: opacity 1s;
+        backdrop-filter: blur(5px); transition: opacity 0.8s ease-out; z-index: 10;
       }
       #out { margin-top: 1rem; font-family: monospace; color: #4CAF50; text-shadow: 1px 1px 2px black; }
       #progress-container { width: 100%; height: 12px; background: #222; border-radius: 6px; margin: 1.5rem 0; overflow: hidden; display: none; border: 1px solid #555; }

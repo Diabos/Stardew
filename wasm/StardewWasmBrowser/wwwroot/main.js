@@ -93,8 +93,7 @@ try {
     // Auto-boot sequence
     setTimeout(async () => {
         setupContainer.style.opacity = '0';
-        setupContainer.style.transition = 'opacity 1s';
-        setTimeout(() => { setupContainer.style.display = 'none'; }, 1000);
+        setTimeout(() => { setupContainer.style.display = 'none'; }, 800);
         
         canvas.style.display = 'block';
         await dotnet.run();

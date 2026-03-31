@@ -2,17 +2,17 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WasmEnableThreads>false</WasmEnableThreads>
+    <WasmEnableThreads>true</WasmEnableThreads>
     <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
     <EmscriptenEnvVars>EM_CACHE=em_cache</EmscriptenEnvVars>
-    <EmccFlags>$(EmccFlags) -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1</EmccFlags>
+    <EmccFlags>$(EmccFlags) -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s EXPORTED_RUNTIME_METHODS=ccall,cwrap,stringToUTF8,UTF8ToString,addFunction</EmccFlags>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\decompiled\StardewValley\Stardew Valley.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+  <ItemGroup>
     <NativeFileReference Include="..\..\lib\SDL2\browser-wasm\SDL2.a" />
     <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\FNA3D.a" />
     <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\libmojoshader.a" />
