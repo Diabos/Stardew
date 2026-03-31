@@ -15,7 +15,7 @@ let moduleAPI = null;
 // The rest of Emscripten/WASM logic will be injected when we implement IDBFS sync
 try {
     const { setModuleImports, getConfig, Module } = await dotnet
-        .withDiagnosticTracing(false)
+        .withDiagnosticTracing(true)
         .withApplicationArgumentsFromQuery()
         .create();
     

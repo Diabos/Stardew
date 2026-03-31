@@ -5,7 +5,7 @@
     <WasmEnableThreads>true</WasmEnableThreads>
     <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
     <EmscriptenEnvVars>EM_CACHE=em_cache</EmscriptenEnvVars>
-    <EmccFlags>$(EmccFlags) -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s EXPORTED_RUNTIME_METHODS=ccall,cwrap,stringToUTF8,UTF8ToString,addFunction</EmccFlags>
+    <EmccFlags>-s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s EXPORTED_RUNTIME_METHODS=ccall,cwrap,stringToUTF8,UTF8ToString,addFunction</EmccFlags>
   </PropertyGroup>
 
   <ItemGroup>
