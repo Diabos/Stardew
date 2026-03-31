@@ -1,0 +1,275 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 1 * *'
+
+jobs:
+  linux:
+    name: Steam Linux Runtime
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
+    steps:
+    - name: Install dependencies
+      run: apt install -y chrpath nasm meson
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Get libdav1d
+      run: sh ext/libdav1d/linux.sh
+
+    - name: Configure CMake (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build (Release)
+      run: |
+        ninja -C release
+        chrpath -d release/libdav1dfile.so
+        strip -S release/libdav1dfile.so
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1dfile-lib64
+        path: release/libdav1dfile.so
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: release/libdav1dfile.so
+
+  linux-aarch64:
+    name: Steam Linux Runtime (AArch64)
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk/arm64:latest
+    steps:
+    - name: Install dependencies
+      run: apt install -y chrpath nasm meson
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Get libdav1d
+      run: sh ext/libdav1d/linux.sh
+
+    - name: Configure CMake (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build (Release)
+      run: |
+        ninja -C release
+        chrpath -d release/libdav1dfile.so
+        strip -S release/libdav1dfile.so
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1dfile-libaarch64
+        path: release/libdav1dfile.so
+
+  linux-mingw:
+    name: Fedora Linux MinGW
+    runs-on: ubuntu-latest
+    container:
+      image: fedora
+    steps:
+    - name: Install toolchain
+      run: |
+        dnf update -y
+        dnf install -y git cmake ninja-build mingw32-gcc mingw64-gcc meson nasm
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Get libdav1d
+      run: |
+        sh ext/libdav1d/mingw64.sh
+        sh ext/libdav1d/mingw32.sh
+
+    - name: Configure CMake 64-bit (Release)
+      run: mingw64-cmake -B release-x64 -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build 64-bit (Release)
+      run: |
+        ninja -C release-x64
+
+    - name: Configure CMake 32-bit (Release)
+      run: mingw32-cmake -B release-x86 -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build 32-bit (Release)
+      run: |
+        ninja -C release-x86
+
+    - name: Archive build result 64-bit
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1dfile-x64-msvcrt
+        path: release-x64/dav1dfile.dll
+
+    - name: Archive build result 32-bit
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1dfile-x86-msvcrt
+        path: release-x86/dav1dfile.dll
+
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ilammy/setup-nasm@v1
+
+    - name: Get libdav1d
+      run: |
+        git clone -b $(cat ext/libdav1d/VERSION) --depth 1 https://code.videolan.org/videolan/dav1d.git
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install Python Dependencies
+      run: pip install meson ninja
+
+    - name: Build libdav1d
+      run: |
+        mkdir dav1d/build
+        cd dav1d
+        meson setup --vsenv --default-library=static --buildtype release ./build
+        meson compile -C ./build
+        cd ../..
+
+    - name: CMake configure (Release)
+      run: |
+        cmake -B release -G "Visual Studio 17 2022" . -DCMAKE_BUILD_TYPE:STRING=Release -A x64
+
+    - name: Build (Release)
+      run: cmake --build release --config Release
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1dfile-x64
+        path: release/Release/dav1dfile.dll
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: release/Release/dav1dfile.dll
+
+  osx:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install packages
+        run: brew install meson nasm ninja
+
+      - name: Get libdav1d
+        run: sh ext/libdav1d/osx.sh
+
+      - name: Configure CMake (Release)
+        run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+
+      - name: Build
+        run: ninja -C release
+
+      - name: Archive build result
+        uses: actions/upload-artifact@v4
+        with:
+          name: dav1dfile-macos
+          path: release/libdav1dfile.1.dylib
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: release/libdav1dfile.1.dylib
+
+  iphoneos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install packages
+        run: brew install meson nasm ninja
+
+      - name: Get libdav1d
+        run: sh ext/libdav1d/ios.sh
+
+      - name: Configure CMake (Release)
+        run: cmake -B release -G Ninja . -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_OSX_SYSROOT=`xcodebuild -version -sdk iphoneos Path` -DBUILD_SHARED_LIBS=OFF
+
+      - name: Build
+        run: ninja -C release
+
+      - name: Merge
+        run: libtool -static -o libdav1dfile.a release/libdav1dfile.a dav1d/build/src/libdav1d.a
+
+      - name: Archive build result
+        uses: actions/upload-artifact@v4
+        with:
+          name: dav1dfile-ios
+          path: libdav1dfile.a
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: libdav1dfile.a
+
+  appletvos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install packages
+        run: brew install meson nasm ninja
+
+      - name: Get libdav1d
+        run: sh ext/libdav1d/tvos.sh
+
+      - name: Configure CMake (Release)
+        run: cmake -B release -G Ninja . -DCMAKE_SYSTEM_NAME=tvOS -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_OSX_SYSROOT=`xcodebuild -version -sdk appletvos Path` -DBUILD_SHARED_LIBS=OFF
+
+      - name: Build
+        run: ninja -C release
+
+      - name: Merge
+        run: libtool -static -o libdav1dfile.a release/libdav1dfile.a dav1d/build/src/libdav1d.a
+
+      - name: Archive build result
+        uses: actions/upload-artifact@v4
+        with:
+          name: dav1dfile-tvos
+          path: libdav1dfile.a
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: libdav1dfile.a
