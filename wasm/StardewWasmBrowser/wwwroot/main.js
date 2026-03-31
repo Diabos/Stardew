@@ -6,6 +6,9 @@ const startBtn = document.getElementById('start-btn');
 const out = document.getElementById('out');
 const setupContainer = document.getElementById('setup-container');
 const canvas = document.getElementById('canvas');
+const progressBar = document.getElementById('progress-bar');
+const progressContainer = document.getElementById('progress-container');
+const percentageText = document.getElementById('percentage');
 
 let moduleAPI = null;
 
@@ -19,6 +22,7 @@ try {
     moduleAPI = Module;
 
     out.innerHTML = "WASM Engine Booted. Connecting to Cloud Assets...";
+    progressContainer.style.display = 'block';
 
     // Start automated asset download loop
     const response = await fetch('assets/catalog.json');
@@ -28,7 +32,11 @@ try {
     let numChunks = 14; 
     
     for(let i = 0; i < numChunks; i++) {
-        out.innerHTML = `Downloading cloud assets... (${Math.round((i/numChunks) * 100)}%)`;
+        const percent = Math.round((i/numChunks) * 100);
+        out.innerHTML = `Downloading cloud data... Chunk ${i+1}/${numChunks}`;
+        progressBar.style.width = percent + "%";
+        percentageText.innerText = percent + "%";
+
         let res = await fetch(`assets/chunk_${i}.bin`);
         chunks[i] = await res.arrayBuffer();
     }
@@ -71,11 +79,16 @@ try {
         processedFiles++;
         
         if (processedFiles % 100 === 0) {
-            out.innerHTML = `Extracting to VFS... (${Math.round((processedFiles/totalFiles)*100)}%)`;
+            const percent = Math.round((processedFiles/totalFiles)*100);
+            out.innerHTML = `Finalizing game world... (${processedFiles}/${totalFiles} files)`;
+            progressBar.style.width = percent + "%";
+            percentageText.innerText = percent + "%";
         }
     }
     
-    out.innerHTML = "Asset Sync Complete!";
+    out.innerHTML = "Launch Sequence Ready!";
+    progressBar.style.width = "100%";
+    percentageText.innerText = "100%";
     startBtn.disabled = false;
     startBtn.innerText = "Play Stardew Valley";
 
