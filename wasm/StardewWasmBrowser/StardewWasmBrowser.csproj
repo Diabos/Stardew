@@ -2,17 +2,28 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WasmEnableThreads>true</WasmEnableThreads>
+    <!-- Threading disabled: SDL2.a was not compiled with atomics/bulk-memory,
+         which is required for shared memory. Rebuild SDL2 with -pthread to re-enable. -->
+    <WasmEnableThreads>false</WasmEnableThreads>
     <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
-    <EmscriptenEnvVars>EM_CACHE=em_cache</EmscriptenEnvVars>
-    <EmccFlags>-s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s EXPORTED_RUNTIME_METHODS=ccall,cwrap,stringToUTF8,UTF8ToString,addFunction</EmccFlags>
+    <EmccFlags>-s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --js-library "$(MSBuildProjectDirectory)\stub.js"</EmccFlags>
   </PropertyGroup>
+
+  <!-- Emscripten will now use the pre-compiled cache from the .NET SDK -->
+
+  <!-- Append our required Emscripten JS runtime exported methods -->
+  <ItemGroup>
+    <EmccExportedRuntimeMethod Include="ccall" />
+    <EmccExportedRuntimeMethod Include="cwrap" />
+    <EmccExportedRuntimeMethod Include="addFunction" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\decompiled\StardewValley\Stardew Valley.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <NativeFileReference Include="stubs.c" />
     <NativeFileReference Include="..\..\lib\SDL2\browser-wasm\SDL2.a" />
     <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\FNA3D.a" />
     <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\libmojoshader.a" />
