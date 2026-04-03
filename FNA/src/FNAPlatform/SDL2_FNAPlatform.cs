@@ -1284,7 +1284,12 @@ namespace Microsoft.Xna.Framework
 
 		public static bool NeedsPlatformMainLoop()
 		{
-			return SDL.SDL_GetPlatform().Equals("Emscripten");
+			/*
+			 * In .NET 8 browser runtime, the legacy emscripten_set_main_loop
+			 * P/Invoke path can fail with missing "__Native" symbols.
+			 * Use the managed loop path instead.
+			 */
+			return false;
 		}
 
 		public static void RunPlatformMainLoop(Game game)
