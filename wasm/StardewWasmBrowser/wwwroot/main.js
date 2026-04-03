@@ -125,12 +125,11 @@ function hideSetupOverlayForLaunch() {
         return;
     }
 
-    // Hide the setup overlay before entering the runtime main loop.
+    // Hide the setup overlay immediately before entering the runtime main loop.
+    // Some runtime entrypoints never resolve in browser mode, so avoid delayed hide logic.
     setupContainer.style.opacity = '0';
     setupContainer.style.pointerEvents = 'none';
-    setTimeout(() => {
-        setupContainer.style.display = 'none';
-    }, 120);
+    setupContainer.style.display = 'none';
 }
 
 function nextAnimationFrame() {
@@ -266,14 +265,20 @@ try {
             // Let the browser paint the canvas/overlay transition before runMain.
             await nextAnimationFrame();
             if (typeof runtime.runMain === 'function' && mainAssemblyName) {
-                const runPromise = runtime.runMain(mainAssemblyName, []);
-                await runPromise;
+                const runResult = runtime.runMain(mainAssemblyName, []);
+                if (runResult && typeof runResult.then === 'function') {
+                    runResult.catch((runErr) => showError(runErr, 'Failed to start game runtime'));
+                }
             } else if (typeof runtime.runMainAndExit === 'function' && mainAssemblyName) {
-                const runPromise = runtime.runMainAndExit(mainAssemblyName, []);
-                await runPromise;
+                const runResult = runtime.runMainAndExit(mainAssemblyName, []);
+                if (runResult && typeof runResult.then === 'function') {
+                    runResult.catch((runErr) => showError(runErr, 'Failed to start game runtime'));
+                }
             } else if (typeof runtime.run === 'function') {
-                const runPromise = runtime.run();
-                await runPromise;
+                const runResult = runtime.run();
+                if (runResult && typeof runResult.then === 'function') {
+                    runResult.catch((runErr) => showError(runErr, 'Failed to start game runtime'));
+                }
             } else {
                 throw new Error('No supported runtime entrypoint found (expected runMain/runMainAndExit).');
             }
