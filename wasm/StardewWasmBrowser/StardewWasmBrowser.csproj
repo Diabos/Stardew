@@ -2,6 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Always build custom native runtime so SDL2/FNA3D archives are linked in CI publishes. -->
+    <WasmBuildNative>true</WasmBuildNative>
     <!-- Threading disabled: SDL2.a was not compiled with atomics/bulk-memory,
          which is required for shared memory. Rebuild SDL2 with -pthread to re-enable. -->
     <WasmEnableThreads>false</WasmEnableThreads>
@@ -23,18 +25,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <NativeFileReference Include="..\..\lib\SDL2\browser-wasm\SDL2.a" />
-    <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\FNA3D.a" />
-    <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\libmojoshader.a" />
+    <NativeFileReference Include="../../lib/SDL2/browser-wasm/SDL2.a" />
+    <NativeFileReference Include="../../lib/FNA3D/browser-wasm/FNA3D.a" />
+    <NativeFileReference Include="../../lib/FNA3D/browser-wasm/libmojoshader.a" />
   </ItemGroup>
 
-  <Target Name="PatchDotnetNativeRuntimeForLegacySdl" AfterTargets="Build">
-    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="powershell -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
-    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
-  </Target>
-
-  <Target Name="PatchDotnetNativeRuntimeForLegacySdlBeforeRun" BeforeTargets="Run">
-    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="powershell -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
-    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
+  <Target Name="ValidateWasmNativeArchives" BeforeTargets="Build;Publish">
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)/../../lib/SDL2/browser-wasm/SDL2.a')"
+           Text="Missing native archive: ../../lib/SDL2/browser-wasm/SDL2.a" />
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)/../../lib/FNA3D/browser-wasm/FNA3D.a')"
+           Text="Missing native archive: ../../lib/FNA3D/browser-wasm/FNA3D.a" />
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)/../../lib/FNA3D/browser-wasm/libmojoshader.a')"
+           Text="Missing native archive: ../../lib/FNA3D/browser-wasm/libmojoshader.a" />
   </Target>
 </Project>
