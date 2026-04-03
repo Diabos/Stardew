@@ -31,6 +31,9 @@ jobs:
       - name: Install wasm-tools workload
         run: dotnet workload install wasm-tools
 
+      - name: Restore project workloads
+        run: dotnet workload restore wasm/StardewWasmBrowser/StardewWasmBrowser.csproj
+
       - name: Clean build
         run: dotnet clean wasm/StardewWasmBrowser/StardewWasmBrowser.csproj -c Release
 
