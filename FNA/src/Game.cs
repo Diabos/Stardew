@@ -864,11 +864,23 @@ namespace Microsoft.Xna.Framework
 			 */
 			if (FNAPlatform.NeedsPlatformMainLoop())
 			{
-				/* This breaks control flow and jumps
-				 * directly into the platform main loop.
-				 * Nothing below this call will be executed.
-				 */
-				FNAPlatform.RunPlatformMainLoop(this);
+				try
+				{
+					/* This breaks control flow and jumps
+					 * directly into the platform main loop.
+					 * Nothing below this call will be executed.
+					 */
+					FNAPlatform.RunPlatformMainLoop(this);
+				}
+				catch (DllNotFoundException)
+				{
+					/* Some managed WebAssembly hosts don't expose the
+					 * native Emscripten main loop entrypoints expected by
+					 * desktop-style P/Invoke declarations. In that case,
+					 * continue with the regular managed loop instead of
+					 * aborting startup.
+					 */
+				}
 			}
 
 			while (RunApplication)
