@@ -6,8 +6,66 @@ const canvas = document.getElementById('canvas');
 const progressBar = document.getElementById('progress-bar');
 const progressContainer = document.getElementById('progress-container');
 const percentageText = document.getElementById('percentage');
+const FRAMEWORK_CACHE_BUSTER = '20260403-1009';
 
 let moduleAPI = null;
+
+function installFrameworkCacheBust() {
+    const originalFetch = globalThis.fetch.bind(globalThis);
+    globalThis.fetch = (input, init) => {
+        try {
+            const sourceUrl = typeof input === 'string'
+                ? input
+                : input instanceof URL
+                    ? input.href
+                    : input && typeof input.url === 'string'
+                        ? input.url
+                        : null;
+
+            if (sourceUrl) {
+                const resolved = new URL(sourceUrl, window.location.href);
+                if (resolved.pathname.includes('/_framework/')) {
+                    resolved.searchParams.set('__v', FRAMEWORK_CACHE_BUSTER);
+                    if (typeof input === 'string' || input instanceof URL) {
+                        input = resolved.toString();
+                    } else {
+                        input = new Request(resolved.toString(), input);
+                    }
+
+                    const nextInit = init ? { ...init } : {};
+                    if (!nextInit.cache) {
+                        nextInit.cache = 'reload';
+                    }
+                    return originalFetch(input, nextInit);
+                }
+            }
+        } catch (_ignored) {
+            // Ignore URL parsing failures and fall back to default fetch.
+        }
+
+        return originalFetch(input, init);
+    };
+}
+
+async function clearStaleClientCaches() {
+    try {
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map((registration) => registration.unregister()));
+        }
+    } catch (_ignored) {
+        // Ignore failures; this is best-effort cache cleanup.
+    }
+
+    try {
+        if ('caches' in globalThis) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((key) => caches.delete(key)));
+        }
+    } catch (_ignored) {
+        // Ignore failures; this is best-effort cache cleanup.
+    }
+}
 
 function getOrCreateErrorOverlay() {
     let overlay = document.getElementById('error-overlay');
@@ -72,6 +130,9 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // The rest of Emscripten/WASM logic will be injected when we implement IDBFS sync
 try {
+    installFrameworkCacheBust();
+    await clearStaleClientCaches();
+
     const runtime = await dotnet
         .withApplicationArgumentsFromQuery()
         .withModuleConfig({ canvas })
