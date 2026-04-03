@@ -20,7 +20,7 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
 		#region Private Constants
 
-		private const string nativeLibName = "FNA3D";
+		private const string nativeLibName = "__Internal";
 
 		#endregion
 
