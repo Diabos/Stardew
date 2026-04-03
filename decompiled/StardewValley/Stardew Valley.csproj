@@ -27,7 +27,7 @@
     </Reference>
     <Reference Include="Lidgren.Network">
       <HintPath>..\..\refs\Lidgren.Network.dll</HintPath>
-      <Private>false</Private>
+      <Private>true</Private>
     </Reference>
     <Reference Include="SkiaSharp">
       <HintPath>..\..\refs\SkiaSharp.dll</HintPath>
