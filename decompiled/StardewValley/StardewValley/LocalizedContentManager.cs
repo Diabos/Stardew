@@ -317,7 +317,35 @@ public class LocalizedContentManager : ContentManager
 	{
 		if (_CachedContentRoot == null)
 		{
-			string path = ((string)(typeof(TitleContainer).GetProperty("Location", BindingFlags.Static | BindingFlags.NonPublic) ?? throw new InvalidOperationException("Can't get TitleContainer.Location property from MonoGame")).GetValue(null, null)) ?? throw new InvalidOperationException("Can't get value of TitleContainer.Location property from MonoGame");
+			string path = null;
+			PropertyInfo property = typeof(TitleContainer).GetProperty("Location", BindingFlags.Static | BindingFlags.NonPublic);
+			if (property != null)
+			{
+				path = property.GetValue(null, null) as string;
+			}
+			if (string.IsNullOrEmpty(path))
+			{
+				string[] array = new string[4]
+				{
+					"/",
+					AppContext.BaseDirectory,
+					Directory.GetCurrentDirectory(),
+					Environment.CurrentDirectory
+				};
+				for (int i = 0; i < array.Length; i++)
+				{
+					string text = array[i];
+					if (!string.IsNullOrWhiteSpace(text) && Directory.Exists(Path.Combine(text, base.RootDirectory)))
+					{
+						path = text;
+						break;
+					}
+				}
+				if (string.IsNullOrEmpty(path))
+				{
+					path = "/";
+				}
+			}
 			_CachedContentRoot = Path.Combine(path, base.RootDirectory);
 		}
 		return _CachedContentRoot;
