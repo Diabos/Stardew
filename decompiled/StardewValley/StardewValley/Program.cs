@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using StardewValley.Network.Compress;
 using StardewValley.SDKs;
-using StardewValley.SDKs.Steam;
 
 namespace StardewValley;
 
@@ -53,7 +52,9 @@ public static class Program
 		{
 			if (_sdk == null)
 			{
-				_sdk = new SteamHelper();
+				// Browser runtime and wasm builds do not ship Steamworks.NET.
+				// Keep SDK initialization Steam-free to avoid type load failures.
+				_sdk = new NullSDKHelper();
 				if (_sdk == null)
 				{
 					_sdk = new NullSDKHelper();

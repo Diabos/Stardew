@@ -1394,6 +1394,11 @@ namespace Microsoft.Xna.Framework
 
 		public static void OnIsMouseVisibleChanged(bool visible)
 		{
+			if (SDL.SDL_GetPlatform().Equals("Emscripten"))
+			{
+				return;
+			}
+
 			if (visible)
 			{
 				SDL.SDL_ShowCursor();

@@ -36,6 +36,8 @@ public class GameRunner : Game
 
 	public GameRunner()
 	{
+		try
+		{
 		Program.sdk.EarlyInitialize();
 		if (!Program.releaseBuild)
 		{
@@ -50,7 +52,21 @@ public class GameRunner : Game
 		Game1.graphics.PreferredBackBufferHeight = 720;
 		base.Content.RootDirectory = "Content";
 		// 0.001f = 0.001f;
-		LocalMultiplayer.Initialize();
+		if (OperatingSystem.IsBrowser())
+		{
+			try
+			{
+				LocalMultiplayer.Initialize();
+			}
+			catch
+			{
+				// Ignore optional platform-type scan failures on browser.
+			}
+		}
+		else
+		{
+			LocalMultiplayer.Initialize();
+		}
 		ItemRegistry.RegisterItemTypes();
 		MaxTextureSize = int.MaxValue;
 		base.Window.AllowUserResizing = true;
@@ -72,6 +88,16 @@ public class GameRunner : Game
 			});
 		};
 		DebugTools.GameConstructed(this);
+		}
+		catch (Exception ex)
+		{
+			Exception inner = ex;
+			while (inner.InnerException != null)
+			{
+				inner = inner.InnerException;
+			}
+			throw new InvalidOperationException("GameRunner initialization failed: " + ex + "\nRoot cause: " + inner, ex);
+		}
 	}
 
 	protected override void OnActivated(object sender, EventArgs args)
@@ -208,11 +234,15 @@ public class GameRunner : Game
 		{
 			gamePtr = game3;
 		}
-		if (gameInstances.Count > 0)
+		if (gameInstances.Count > 0 && CanUseLocalMultiplayerStatics())
 		{
 			game3.staticVarHolder = Activator.CreateInstance(LocalMultiplayer.StaticVarHolderType);
 			SetInstanceDefaults(game3);
 			LoadInstance(game3);
+		}
+		else
+		{
+			game3.staticVarHolder = null;
 		}
 		Game1.game1 = game3;
 		game3.Instance_Initialize();
@@ -396,8 +426,18 @@ public class GameRunner : Game
 		return false;
 	}
 
+	private static bool CanUseLocalMultiplayerStatics()
+	{
+		return LocalMultiplayer.StaticVarHolderType != null && LocalMultiplayer.staticDefaults != null && LocalMultiplayer.staticFields != null && LocalMultiplayer.StaticSave != null && LocalMultiplayer.StaticLoad != null;
+	}
+
 	private static void SetInstanceDefaults(InstanceGame instance)
 	{
+		if (!CanUseLocalMultiplayerStatics())
+		{
+			instance.staticVarHolder = null;
+			return;
+		}
 		for (int i = 0; i < LocalMultiplayer.staticDefaults.Count; i++)
 		{
 			object value = LocalMultiplayer.staticDefaults[i]?.DeepClone();
@@ -410,6 +450,10 @@ public class GameRunner : Game
 	{
 		if (force || LocalMultiplayer.IsLocalMultiplayer())
 		{
+			if (!CanUseLocalMultiplayerStatics())
+			{
+				return;
+			}
 			if (instance.staticVarHolder == null)
 			{
 				instance.staticVarHolder = Activator.CreateInstance(LocalMultiplayer.StaticVarHolderType);
@@ -423,6 +467,10 @@ public class GameRunner : Game
 		Game1.game1 = instance as Game1;
 		if ((force || LocalMultiplayer.IsLocalMultiplayer()) && instance.staticVarHolder != null)
 		{
+			if (!CanUseLocalMultiplayerStatics())
+			{
+				return;
+			}
 			LocalMultiplayer.StaticLoad(instance.staticVarHolder);
 			if (Game1.player != null && Game1.player.isCustomized.Value && Game1.splitscreenOptions.TryGetValue(Game1.player.UniqueMultiplayerID, out var value))
 			{

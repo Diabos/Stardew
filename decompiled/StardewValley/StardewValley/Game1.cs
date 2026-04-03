@@ -2137,7 +2137,9 @@ public class Game1 : InstanceGame
 
 	static Game1()
 	{
-		realMilliSecondsPerGameMinute = 700;
+		try
+		{
+			realMilliSecondsPerGameMinute = 700;
 		realMilliSecondsPerGameTenMinutes = realMilliSecondsPerGameMinute * 10;
 		cursor_none = -1;
 		cursor_default = 0;
@@ -2328,7 +2330,14 @@ public class Game1 : InstanceGame
 		}
 		if (string.IsNullOrWhiteSpace(version))
 		{
-			throw new InvalidOperationException("No game version found in assembly info.");
+			version = "1.6.0";
+			versionLabel = "wasm";
+			versionBuildNumber = 0;
+		}
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException("Game1 static initialization failed: " + ex, ex);
 		}
 	}
 

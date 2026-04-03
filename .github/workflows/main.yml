@@ -20,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -33,6 +36,9 @@ jobs:
 
       - name: Publish WASM project
         run: dotnet publish wasm/StardewWasmBrowser/StardewWasmBrowser.csproj -c Release -o output
+
+      - name: Ensure .nojekyll exists
+        run: touch output/wwwroot/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -54,10 +54,21 @@ public class LocalMultiplayer
 		{
 			if (!hashSet.Contains(assembly.GetName().Name.Split('.')[0]))
 			{
-				Type[] types = assembly.GetTypes();
-				foreach (Type item in types)
+				Type[] array;
+				try
 				{
-					list.Add(item);
+					array = assembly.GetTypes();
+				}
+				catch (ReflectionTypeLoadException ex)
+				{
+					array = ex.Types;
+				}
+				foreach (Type item in array)
+				{
+					if (item != null)
+					{
+						list.Add(item);
+					}
 				}
 			}
 		}

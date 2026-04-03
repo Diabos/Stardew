@@ -6,7 +6,7 @@
          which is required for shared memory. Rebuild SDL2 with -pthread to re-enable. -->
     <WasmEnableThreads>false</WasmEnableThreads>
     <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
-    <EmccFlags>-s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --js-library "$(MSBuildProjectDirectory)\stub.js"</EmccFlags>
+    <EmccFlags>-s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --js-library &quot;$(MSBuildProjectDirectory)/stub.js&quot;</EmccFlags>
   </PropertyGroup>
 
   <!-- Emscripten will now use the pre-compiled cache from the .NET SDK -->
@@ -23,9 +23,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <NativeFileReference Include="stubs.c" />
     <NativeFileReference Include="..\..\lib\SDL2\browser-wasm\SDL2.a" />
     <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\FNA3D.a" />
     <NativeFileReference Include="..\..\lib\FNA3D\browser-wasm\libmojoshader.a" />
   </ItemGroup>
+
+  <Target Name="PatchDotnetNativeRuntimeForLegacySdl" AfterTargets="Build">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
+  </Target>
+
+  <Target Name="PatchDotnetNativeRuntimeForLegacySdlBeforeRun" BeforeTargets="Run">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
+  </Target>
 </Project>
