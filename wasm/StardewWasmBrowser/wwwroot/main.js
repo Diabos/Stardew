@@ -211,12 +211,28 @@ try {
         let fileData = new Uint8Array(bytesLeft);
         let dstOffset = 0;
         
-        while(bytesLeft > 0) {
-            let chunkData = chunks[pChunk];
-            let bytesToCopy = Math.min(bytesLeft, chunkData.byteLength - pOffset);
-            let view = new Uint8Array(chunkData, pOffset, bytesToCopy);
+        while (bytesLeft > 0) {
+            const chunkData = chunks[pChunk];
+            if (!chunkData) {
+                throw new Error(`Missing chunk_${pChunk}.bin while reconstructing '${path}'.`);
+            }
+
+            // Handle exact chunk-boundary offsets without stalling.
+            if (pOffset >= chunkData.byteLength) {
+                pChunk++;
+                pOffset = 0;
+                continue;
+            }
+
+            const available = chunkData.byteLength - pOffset;
+            const bytesToCopy = Math.min(bytesLeft, available);
+            if (bytesToCopy <= 0) {
+                throw new Error(`Invalid asset span for '${path}' at chunk ${pChunk} offset ${pOffset}.`);
+            }
+
+            const view = new Uint8Array(chunkData, pOffset, bytesToCopy);
             fileData.set(view, dstOffset);
-            
+
             dstOffset += bytesToCopy;
             bytesLeft -= bytesToCopy;
             pChunk++;
