@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BmFont;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
+using StardewValley.InternalBmFont;
 
 namespace StardewValley.BellsAndWhistles;
 

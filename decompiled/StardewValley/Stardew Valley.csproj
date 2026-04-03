@@ -33,10 +33,6 @@
       <HintPath>..\..\refs\SkiaSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="BmFont">
-      <HintPath>..\..\refs\BmFont.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
     <Reference Include="TextCopy">
       <HintPath>..\..\refs\TextCopy.dll</HintPath>
       <Private>false</Private>
