@@ -50,7 +50,7 @@ public class KeyboardDispatcher
 
 	public void Cleanup()
 	{
-		if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.Win32NT)
+		if (OperatingSystem.IsBrowser() || Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.Win32NT)
 		{
 			/* TextInput -= */  // Event_TextInput;
 		}
@@ -68,7 +68,7 @@ public class KeyboardDispatcher
 		_keysDown = new List<Keys>();
 		_charsEntered = new List<char>();
 		_window = window;
-		if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.Win32NT)
+		if (OperatingSystem.IsBrowser() || Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.Win32NT)
 		{
 			/* TextInput += */  // Event_TextInput;
 			return;

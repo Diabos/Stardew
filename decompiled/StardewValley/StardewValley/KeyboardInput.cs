@@ -70,6 +70,11 @@ public static class KeyboardInput
 		{
 			throw new InvalidOperationException("TextInput.Initialize can only be called once!");
 		}
+		if (OperatingSystem.IsBrowser())
+		{
+			initialized = true;
+			return;
+		}
 		hookProcDelegate = HookProc;
 		prevWndProc = (IntPtr)SetWindowLong(window.Handle, -4, (int)Marshal.GetFunctionPointerForDelegate(hookProcDelegate));
 		hIMC = ImmGetContext(window.Handle);
