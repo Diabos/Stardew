@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PublishTrimmed>false</PublishTrimmed>
     <!-- Always build custom native runtime so SDL2/FNA3D archives are linked in CI publishes. -->
     <WasmBuildNative>true</WasmBuildNative>
     <!-- Threading disabled: SDL2.a was not compiled with atomics/bulk-memory,
