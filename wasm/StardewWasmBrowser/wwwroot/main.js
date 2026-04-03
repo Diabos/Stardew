@@ -120,6 +120,23 @@ function showError(err, prefix = 'Error loading WASM') {
     console.error(err);
 }
 
+function hideSetupOverlayForLaunch() {
+    if (!setupContainer) {
+        return;
+    }
+
+    // Hide the setup overlay before entering the runtime main loop.
+    setupContainer.style.opacity = '0';
+    setupContainer.style.pointerEvents = 'none';
+    setTimeout(() => {
+        setupContainer.style.display = 'none';
+    }, 120);
+}
+
+function nextAnimationFrame() {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+}
+
 window.addEventListener('error', (event) => {
     showError(event.error || event.message, 'Runtime error');
 });
@@ -228,20 +245,18 @@ try {
     setTimeout(async () => {
         try {
             canvas.style.display = 'block';
+            hideSetupOverlayForLaunch();
+
+            // Let the browser paint the canvas/overlay transition before runMain.
+            await nextAnimationFrame();
             if (typeof runtime.runMain === 'function' && mainAssemblyName) {
                 const runPromise = runtime.runMain(mainAssemblyName, []);
-                setupContainer.style.opacity = '0';
-                setTimeout(() => { setupContainer.style.display = 'none'; }, 800);
                 await runPromise;
             } else if (typeof runtime.runMainAndExit === 'function' && mainAssemblyName) {
                 const runPromise = runtime.runMainAndExit(mainAssemblyName, []);
-                setupContainer.style.opacity = '0';
-                setTimeout(() => { setupContainer.style.display = 'none'; }, 800);
                 await runPromise;
             } else if (typeof runtime.run === 'function') {
                 const runPromise = runtime.run();
-                setupContainer.style.opacity = '0';
-                setTimeout(() => { setupContainer.style.display = 'none'; }, 800);
                 await runPromise;
             } else {
                 throw new Error('No supported runtime entrypoint found (expected runMain/runMainAndExit).');
