@@ -29,10 +29,12 @@
   </ItemGroup>
 
   <Target Name="PatchDotnetNativeRuntimeForLegacySdl" AfterTargets="Build">
-    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="powershell -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
   </Target>
 
   <Target Name="PatchDotnetNativeRuntimeForLegacySdlBeforeRun" BeforeTargets="Run">
-    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="powershell -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/patch-dotnet-native.ps1&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/wwwroot/_framework&quot;" />
   </Target>
 </Project>
