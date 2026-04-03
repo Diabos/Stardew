@@ -1194,12 +1194,7 @@ namespace Microsoft.Xna.Framework
 
 		public static bool NeedsPlatformMainLoop()
 		{
-			/*
-			 * In .NET 8 browser runtime, the legacy emscripten_set_main_loop
-			 * P/Invoke path can fail with missing "__Native" symbols.
-			 * Use the managed loop path instead.
-			 */
-			return false;
+			return SDL.SDL_GetPlatform().Equals("Emscripten");
 		}
 
 		public static void RunPlatformMainLoop(Game game)
@@ -1228,14 +1223,14 @@ namespace Microsoft.Xna.Framework
 		private static Game emscriptenGame;
 		private delegate void em_callback_func();
 
-		[DllImport("__Native", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
 		private static extern void emscripten_set_main_loop(
 			em_callback_func func,
 			int fps,
 			int simulate_infinite_loop
 		);
 
-		[DllImport("__Native", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
 		private static extern void emscripten_cancel_main_loop();
 
 		[ObjCRuntime.MonoPInvokeCallback(typeof(em_callback_func))]
