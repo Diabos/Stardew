@@ -41,17 +41,5 @@
       <HintPath>..\..\refs\TextCopy.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="System.Data.HashFunction.Interfaces">
-      <HintPath>..\..\refs\System.Data.HashFunction.Interfaces.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="System.Data.HashFunction.xxHash">
-      <HintPath>..\..\refs\System.Data.HashFunction.xxHash.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="System.Data.HashFunction.Core">
-      <HintPath>..\..\refs\System.Data.HashFunction.Core.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
   </ItemGroup>
 </Project>

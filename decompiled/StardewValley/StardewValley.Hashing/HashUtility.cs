@@ -1,5 +1,4 @@
 using System;
-using System.Data.HashFunction;
 using System.Text;
 
 namespace StardewValley.Hashing;
@@ -7,9 +6,6 @@ namespace StardewValley.Hashing;
 /// <inheritdoc cref="T:StardewValley.Hashing.IHashUtility" />
 public class HashUtility : IHashUtility
 {
-	/// <summary>The underlying hashing API.</summary>
-	private static readonly IHashFunction Hasher = (IHashFunction)new xxHash(32);
-
 	/// <inheritdoc />
 	public int GetDeterministicHashCode(string value)
 	{
@@ -29,6 +25,14 @@ public class HashUtility : IHashUtility
 	/// <param name="data">The data to hash.</param>
 	public int GetDeterministicHashCode(byte[] data)
 	{
-		return BitConverter.ToInt32(Hasher.ComputeHash(data), 0);
+		const uint fnvOffset = 2166136261;
+		const uint fnvPrime = 16777619;
+		uint hash = fnvOffset;
+		for (int i = 0; i < data.Length; i++)
+		{
+			hash ^= data[i];
+			hash *= fnvPrime;
+		}
+		return unchecked((int)hash);
 	}
 }
